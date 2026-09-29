@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AgroSense Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">AGROSENSE · MOCK MODE</p>
+        <h1>Smart Farm Dashboard</h1>
+        <p class="subtitle">Monitor crop conditions and test AI-assisted irrigation decisions.</p>
+      </div>
+      <div class="status-pill"><span class="status-dot"></span> Mock data online</div>
+    </header>
+
+    <section class="summary-grid" aria-label="Key sensor readings">
+      <article class="metric-card accent-green"><div class="metric-label">Soil moisture</div><div class="metric-value"><span id="soilMoisture">41</span><span class="unit">%</span></div><div class="metric-note" id="soilNote">Within target range</div></article>
+      <article class="metric-card accent-blue"><div class="metric-label">Temperature</div><div class="metric-value"><span id="temperature">28.4</span><span class="unit">°C</span></div><div class="metric-note" id="temperatureNote">Comfortable for crops</div></article>
+      <article class="metric-card accent-purple"><div class="metric-label">Humidity</div><div class="metric-value"><span id="humidity">72</span><span class="unit">%</span></div><div class="metric-note">Greenhouse air</div></article>
+      <article class="metric-card accent-orange"><div class="metric-label">Light level</div><div class="metric-value"><span id="light">620</span><span class="unit">lux</span></div><div class="metric-note">Natural light available</div></article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel chart-panel">
+        <div class="panel-heading"><div><p class="eyebrow">LIVE TREND</p><h2>Soil moisture history</h2></div><span class="time-range">Last 24 hours</span></div>
+        <div class="chart-wrap"><canvas id="soilChart" width="760" height="290" aria-label="Soil moisture chart"></canvas></div>
+        <div class="legend"><span><i class="legend-line green"></i> Soil moisture</span><span><i class="legend-line target"></i> Target minimum: 35%</span></div>
+      </article>
+
+      <article class="panel recommendation-panel">
+        <div class="panel-heading"><div><p class="eyebrow">AI INSIGHT</p><h2>Today's recommendation</h2></div><span class="sparkle">✦</span></div>
+        <div class="recommendation-icon">💧</div>
+        <h3 id="recommendationTitle">Delay irrigation</h3>
+        <p id="recommendationText">Soil moisture is currently 41%, and no rain is detected. Recheck tomorrow morning before watering.</p>
+        <div class="recommendation-meta"><span>Estimated saving</span><strong id="saving">25%</strong></div>
+        <button class="primary-button" id="refreshButton">Refresh mock reading</button>
+      </article>
+    </section>
+
+    <section class="bottom-grid">
+      <article class="panel sensors-panel">
+        <div class="panel-heading"><div><p class="eyebrow">ENVIRONMENT</p><h2>Sensor details</h2></div><span class="updated" id="updatedAt">Updated just now</span></div>
+        <div class="sensor-list">
+          <div class="sensor-row"><span><b class="sensor-icon">☁</b> CO₂</span><strong><span id="co2">520</span> ppm</strong></div>
+          <div class="sensor-row"><span><b class="sensor-icon">◌</b> TVOC</span><strong><span id="tvoc">85</span> ppb</strong></div>
+          <div class="sensor-row"><span><b class="sensor-icon">☔</b> Rain detected</span><strong id="rain">No</strong></div>
+          <div class="sensor-row"><span><b class="sensor-icon">◉</b> Soil pH</span><strong id="ph">6.4</strong></div>
+        </div>
+      </article>
+
+      <article class="panel chat-panel">
+        <div class="panel-heading"><div><p class="eyebrow">AI ASSISTANT</p><h2>Ask about your farm</h2></div><span class="assistant-badge">K3</span></div>
+        <div class="chat-messages" id="chatMessages"><div class="message assistant">Hello! Ask me about irrigation, crop conditions, or today's sensor readings.</div></div>
+        <form class="chat-form" id="chatForm"><input id="chatInput" autocomplete="off" placeholder="e.g. Should I water today?" /><button aria-label="Send question">Send</button></form>
+      </article>
+    </section>
+
+    <footer>AgroSense prototype · Static mock data for UI development · Last sync: <span id="footerTime"></span></footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
