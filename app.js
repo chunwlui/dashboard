@@ -41,3 +41,47 @@ function drawChart() {
 $('refreshButton').addEventListener('click',()=>{ const delta=Math.round((Math.random()-.5)*8); state.soilMoisture=Math.max(22,Math.min(65,state.soilMoisture+delta)); state.temperature=27.5+Math.random()*3; state.humidity=Math.round(66+Math.random()*15); state.light=Math.round(450+Math.random()*350); state.co2=Math.round(470+Math.random()*120); state.tvoc=Math.round(50+Math.random()*90); state.history=[...state.history.slice(1),state.soilMoisture]; render(); });
 $('chatForm').addEventListener('submit',e=>{e.preventDefault();const input=$('chatInput'),q=input.value.trim();if(!q)return;const messages=$('chatMessages');messages.insertAdjacentHTML('beforeend',`<div class="message user"></div>`);messages.lastElementChild.textContent=q;let answer='Based on the mock readings, conditions look stable. I would recheck soil moisture tomorrow morning.';if(/water|irrigat/i.test(q))answer=state.soilMoisture<35?'Yes. Mock soil moisture is low, so irrigation is recommended if no rain is detected.':'Not yet. Mock soil moisture is above 35%, so delaying irrigation should save water.';if(/temperature|hot|fan/i.test(q))answer=state.temperature>32?'The mock temperature is high; increase fan speed.':'Temperature is currently comfortable for the crops.';messages.insertAdjacentHTML('beforeend',`<div class="message assistant"></div>`);messages.lastElementChild.textContent=answer;messages.scrollTop=messages.scrollHeight;input.value='';});
 render();
+async function updateHkoTemperature() {
+  const temperatureElement = document.getElementById('hkoTemperature');
+  const statusElement = document.getElementById('hkoStatus');
+
+  try {
+    const url =
+      'https://data.weather.gov.hk/weatherAPI/opendata/weather.php' +
+      '?dataType=rhrread&lang=en';
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HKO returned HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Select the Hong Kong Observatory station, rather than a random HK station.
+    const reading = data.temperature?.data?.find(
+      item => item.place === 'Hong Kong Observatory'
+    );
+
+    if (!reading || !Number.isFinite(Number(reading.value))) {
+      throw new Error('Hong Kong Observatory temperature is unavailable');
+    }
+
+    temperatureElement.textContent = `${reading.value} °C`;
+
+    const observationTime = data.temperature.recordTime || data.updateTime;
+    statusElement.textContent = observationTime
+      ? `HKO observation: ${new Date(observationTime).toLocaleString('en-HK', {
+          timeZone: 'Asia/Hong_Kong',
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })} HKT`
+      : 'Source: Hong Kong Observatory';
+  } catch (error) {
+    console.error('Could not load HKO temperature:', error);
+    temperatureElement.textContent = 'Unavailable';
+    statusElement.textContent = 'HKO data could not be loaded. Try again later.';
+  }
+}
+
+updateHkoTemperature();
+setInterval(updateHkoTemperature, 10 * 60 * 1000);
