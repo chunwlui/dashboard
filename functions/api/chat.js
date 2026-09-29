@@ -82,7 +82,7 @@ export async function onRequestPost(context) {
         'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek-flash',
+        model: 'deepseek-v4-pro',
         messages,
         stream: false,
         max_tokens: 35000,
