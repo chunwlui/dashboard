@@ -66,14 +66,14 @@ export async function onRequestPost(context) {
         'These readings are currently MOCK DATA, not verified farm measurements.',
         'Do not claim that you have switched a pump, fan, light, or other device.',
         'Give practical suggestions, mention uncertainty, and recommend checking real sensors before taking action.'
-        "Answer in clear, natural English unless the user writes in Chinese or Cantonese. " +
-        "Use a short direct answer first. " +
-        "For longer answers, use short sections with simple headings and bullet points. " +
-        "Use numbered steps only when explaining a process. " +
-        "Keep paragraphs short. " +
-        "Give practical examples when useful. " +
-        "Do not use Markdown symbols such as **, #, or ``` because the website displays plain text. " +
-        "If you are uncertain, clearly say what you are unsure about. " +,
+        "Answer in clear, natural English unless the user writes in Chinese or Cantonese. " 
+        "Use a short direct answer first. " 
+        "For longer answers, use short sections with simple headings and bullet points. " 
+        "Use numbered steps only when explaining a process. " 
+        "Keep paragraphs short. " 
+        "Give practical examples when useful. " 
+        "Do not use Markdown symbols such as **, #, or ``` because the website displays plain text. " 
+        "If you are uncertain, clearly say what you are unsure about. " 
         `Current dashboard readings: ${JSON.stringify(farmData)}`
       ].join(' ')
     },
