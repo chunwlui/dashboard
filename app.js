@@ -7,6 +7,7 @@ const state = {
   tvoc: 85,
   ph: 6.4,
   rain: false,
+  hkoForecast: [],
   history: [
     48, 47, 46, 45, 44, 43, 42, 41,
     40, 39, 40, 41, 42, 42, 41, 40,
@@ -15,6 +16,92 @@ const state = {
 };
 
 const $ = id => document.getElementById(id);
+
+function formatHkoForecastDate(dateString) {
+  if (!/^\d{8}$/.test(dateString || '')) return dateString || '--';
+
+  const date = new Date(Date.UTC(
+    Number(dateString.slice(0, 4)),
+    Number(dateString.slice(4, 6)) - 1,
+    Number(dateString.slice(6, 8))
+  ));
+
+  return date.toLocaleDateString('en-HK', {
+    timeZone: 'Asia/Hong_Kong',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+function forecastValue(value, fallback = '--') {
+  if (value && typeof value === 'object' && 'value' in value) {
+    return value.value;
+  }
+  return value ?? fallback;
+}
+
+function renderHkoForecast() {
+  const list = $('hkoForecastList');
+  if (!list) return;
+
+  if (!state.hkoForecast.length) {
+    list.innerHTML = '<p class="metric-note">HKO forecast unavailable. Please try again later.</p>';
+    return;
+  }
+
+  list.innerHTML = state.hkoForecast.map(day => `
+    <article class="forecast-day">
+      <div class="forecast-date">${day.dateLabel}</div>
+      <div class="forecast-icon" aria-hidden="true">${day.icon}</div>
+      <div class="forecast-weather">${day.weather}</div>
+      <div class="forecast-temp">${day.min}–${day.max} °C</div>
+      <div class="forecast-rain">Rain: ${day.rain}</div>
+    </article>
+  `).join('');
+}
+
+async function updateHkoForecast() {
+  const statusElement = $('hkoForecastStatus');
+  const url =
+    'https://data.weather.gov.hk/weatherAPI/opendata/weather.php' +
+    '?dataType=fnd&lang=en';
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HKO forecast HTTP ${response.status}`);
+
+    const data = await response.json();
+    const forecasts = Array.isArray(data.weatherForecast)
+      ? data.weatherForecast.slice(0, 7)
+      : [];
+
+    if (!forecasts.length) throw new Error('No HKO forecast records returned');
+
+    state.hkoForecast = forecasts.map(day => ({
+      date: day.forecastDate || '',
+      dateLabel: formatHkoForecastDate(day.forecastDate),
+      weather: day.forecastWeather || 'Not available',
+      min: forecastValue(day.forecastMintemp),
+      max: forecastValue(day.forecastMaxtemp),
+      rain: day.PSR || 'Not available',
+      icon: '☁'
+    }));
+
+    statusElement.textContent = data.updateTime
+      ? `Updated ${new Date(data.updateTime).toLocaleString('en-HK', {
+          timeZone: 'Asia/Hong_Kong', hour: '2-digit', minute: '2-digit'
+        })} HKT`
+      : 'Latest available forecast';
+
+    renderHkoForecast();
+  } catch (error) {
+    console.error('Could not load HKO forecast:', error);
+    state.hkoForecast = [];
+    statusElement.textContent = 'HKO forecast unavailable';
+    renderHkoForecast();
+  }
+}
 
 function render() {
   $('soilMoisture').textContent = state.soilMoisture;
@@ -218,7 +305,8 @@ $('chatForm').addEventListener('submit', async event => {
           co2: state.co2,
           tvoc: state.tvoc,
           ph: state.ph,
-          rain: state.rain
+          rain: state.rain,
+          hkoForecast: state.hkoForecast
         }
       })
     });
@@ -304,6 +392,8 @@ async function updateHkoTemperature() {
 
 render();
 updateHkoTemperature();
+updateHkoForecast();
 
-// Check for a newer HKO observation every 10 minutes.
+// HKO publishes new observations/forecasts periodically; refresh every 10 minutes.
 setInterval(updateHkoTemperature, 10 * 60 * 1000);
+setInterval(updateHkoForecast, 10 * 60 * 1000);
