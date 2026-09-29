@@ -1,4 +1,4 @@
-const MAX_QUESTION_LENGTH = 500;
+const MAX_QUESTION_LENGTH = 50000;
 const MAX_CONVERSATION_MESSAGES = 12;
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
 
@@ -82,10 +82,10 @@ export async function onRequestPost(context) {
         'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-flash',
         messages,
         stream: false,
-        max_tokens: 350,
+        max_tokens: 35000,
         temperature: 0.4
       })
     });
