@@ -1,239 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AgroSense Dashboard</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#254b35">
+  <title>AgroSense · Farm overview</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+  <script src="chat.js" defer></script>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">AGROSENSE · MOCK FARM DATA</p>
-        <h1>Smart Farm Dashboard</h1>
-        <p class="subtitle">
-          Monitor crop conditions and test AI-assisted irrigation decisions.
-        </p>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <aside class="sidebar" aria-label="Main navigation">
+    <a href="#overview" class="brand"><span class="brand-mark" aria-hidden="true">↗</span> AgroSense<span class="brand-dot">.</span></a>
+    <div class="workspace"><span class="farm-avatar">G</span><div><strong>Greenfield farm</strong><small>Smart growing workspace</small></div><span class="workspace-arrow" aria-hidden="true">⌄</span></div>
+    <p class="nav-label">WORKSPACE</p>
+    <nav>
+      <a class="nav-link active" href="#overview"><span aria-hidden="true">▦</span> Overview</a>
+      <a class="nav-link" href="#sensors"><span aria-hidden="true">⌁</span> Sensor insights</a>
+      <a class="nav-link" href="#irrigation"><span aria-hidden="true">♧</span> Irrigation <span class="nav-count">Demo</span></a>
+      <a class="nav-link" href="#weather"><span aria-hidden="true">☼</span> Weather outlook</a>
+      <a class="nav-link" href="#assistant"><span aria-hidden="true">✧</span> Farm assistant</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="demo-note"><span class="live-dot"></span><strong>A little room to experiment.</strong><p>Farm readings and controls are simulated. Your plants are safe.</p><span class="demo-tag">DEMO WORKSPACE</span></div><div class="profile"><span class="profile-avatar">GF</span><div><strong>Greenfield team</strong><small>Farm administrator</small></div></div></div>
+  </aside>
+  <div class="page-shell">
+    <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong>Farm overview</strong></div><div class="topbar-actions"><span class="demo-tag">MOCK SENSORS</span><button id="themeToggle" class="icon-button" aria-label="Switch to dark theme" title="Switch theme">◐</button><span class="profile-avatar small-avatar">GF</span></div></header>
+    <main id="main" class="main-content">
+      <section id="overview" class="page-heading"><div><p class="eyebrow">GROW BETTER, EVERY DAY</p><h1>A good day to grow<span>.</span></h1><p class="muted">A clearer picture of your farm, from the ground up.</p></div><div class="heading-actions"><label class="sr-only" for="zoneSelect">Farm zone</label><select id="zoneSelect" class="form-select"><option value="greenhouse">Greenhouse A</option><option value="field">Open field B</option><option value="nursery">Nursery C</option></select><button id="refreshButton" class="btn btn-primary">↻ &nbsp; Refresh demo</button></div></section>
+      <div class="context-strip"><div><span class="live-dot"></span><strong id="zoneLabel">Greenhouse A</strong><span class="context-divider">/</span><span id="zoneDescription">Leafy greens · covered growing area</span></div><span id="updatedAt" role="status">Preparing mock readings…</span></div>
+      <section id="metricCards" class="metric-grid" aria-label="Simulated farm sensors"></section>
+      <div class="primary-grid">
+        <section id="sensors" class="card chart-card"><div class="card-heading"><div><p class="eyebrow">A CLOSER LOOK</p><h2>Sensor activity</h2></div><div class="segmented" role="group" aria-label="History range"><button data-range="6" aria-pressed="false">6h</button><button data-range="12" aria-pressed="false">12h</button><button data-range="24" aria-pressed="true" class="selected">24h</button></div></div><div class="chart-controls"><div class="metric-tabs" role="group" aria-label="Chart sensor"><button data-metric="soilMoisture" class="selected" aria-pressed="true">Soil moisture</button><button data-metric="temperature" aria-pressed="false">Temperature</button><button data-metric="humidity" aria-pressed="false">Humidity</button><button data-metric="light" aria-pressed="false">Light</button></div><span class="legend-key"><i></i> Mock history</span></div><div class="chart-summary"><strong id="chartValue">41<span>%</span></strong><span id="chartCaption">Current soil moisture</span></div><div id="chartArea" class="chart-area"></div><div class="chart-footer"><span id="chartHint">Select a point to inspect a reading.</span><span>Simulated hourly data · HKT</span></div></section>
+        <section id="irrigation" class="insight-card"><div class="insight-top"><span class="insight-badge">✧ &nbsp; GROWING INSIGHT</span><span class="demo-tag">RULE-BASED</span></div><div class="plant-art" aria-hidden="true"><svg viewBox="0 0 180 110" fill="none"><path d="M90 100V39" stroke="#c7dc9d" stroke-width="3"/><path d="M90 68C51 73 36 47 40 27C69 25 91 39 90 68Z" fill="#86aa6c"/><path d="M91 52C91 25 110 13 139 17C140 43 121 58 91 52Z" fill="#cfdfa9"/><path d="M90 69L51 39M91 53L129 28" stroke="#254b35" stroke-width="1.5"/><ellipse cx="90" cy="101" rx="47" ry="4" fill="#ffffff" opacity=".08"/></svg></div><h2 id="recommendationTitle">Let nature do its thing.</h2><p id="recommendationText"></p><div class="threshold-row"><label for="threshold">Moisture target</label><output id="thresholdValue" for="threshold">35%</output></div><input id="threshold" type="range" min="25" max="55" value="35" aria-label="Mock irrigation moisture threshold"><div class="irrigation-status"><span>Pump simulation</span><strong id="pumpStatus">Standby</strong></div><button id="irrigateButton" class="btn irrigation-button">Simulate watering <span>↗</span></button><p class="simulation-footnote">Demo only. No physical device is connected.</p></section>
       </div>
-      <div class="status-pill">
-        <span class="status-dot"></span>
-        Mock farm data online
-      </div>
-    </header>
-
-    <section class="summary-grid" aria-label="Key farm sensor readings">
-      <article class="metric-card accent-green">
-        <div class="metric-label">Soil moisture</div>
-        <div class="metric-value">
-          <span id="soilMoisture">41</span><span class="unit">%</span>
-        </div>
-        <div class="metric-note" id="soilNote">Within target range</div>
-      </article>
-
-      <article class="metric-card accent-blue">
-        <div class="metric-label">Farm temperature · mock</div>
-        <div class="metric-value">
-          <span id="temperature">28.4</span><span class="unit">°C</span>
-        </div>
-        <div class="metric-note" id="temperatureNote">
-          Comfortable for crops
-        </div>
-      </article>
-
-      <article class="metric-card accent-purple">
-        <div class="metric-label">Humidity</div>
-        <div class="metric-value">
-          <span id="humidity">72</span><span class="unit">%</span>
-        </div>
-        <div class="metric-note">Greenhouse air · mock</div>
-      </article>
-
-      <article class="metric-card accent-orange">
-        <div class="metric-label">Light level</div>
-        <div class="metric-value">
-          <span id="light">620</span><span class="unit">lux</span>
-        </div>
-        <div class="metric-note">Natural light · mock</div>
-      </article>
-    </section>
-
-    <!-- Separate block for real HKO outdoor weather data -->
-    <section
-      class="panel"
-      aria-label="Hong Kong Observatory outdoor temperature"
-      style="margin-bottom: 18px"
-    >
-      <div class="panel-heading">
-        <div>
-          <p class="eyebrow">LIVE WEATHER · HONG KONG OBSERVATORY</p>
-          <h2>Hong Kong outdoor temperature</h2>
-        </div>
-        <span class="time-range">HKO station</span>
-      </div>
-
-      <div class="metric-value" aria-live="polite">
-        <span id="hkoTemperature">--</span>
-        <span class="unit">°C</span>
-      </div>
-
-      <p class="metric-note" id="hkoStatus">
-        Fetching the latest available observation…
-      </p>
-
-      <p class="metric-note">
-        Outdoor weather observation; not the temperature at your farm.
-        Source: Hong Kong Observatory.
-      </p>
-    </section>
-
-    <section class="panel forecast-panel" aria-label="Hong Kong Observatory seven day weather forecast">
-      <div class="panel-heading">
-        <div>
-          <p class="eyebrow">7-DAY FORECAST · HONG KONG OBSERVATORY</p>
-          <h2>Hong Kong weather outlook</h2>
-        </div>
-        <span class="time-range" id="hkoForecastStatus">Loading…</span>
-      </div>
-
-      <div class="forecast-list" id="hkoForecastList" aria-live="polite">
-        <p class="metric-note">Fetching the latest HKO forecast…</p>
-      </div>
-
-      <p class="metric-note forecast-source">
-        Forecast data: Hong Kong Observatory. The forecast is also supplied to the DeepSeek farm assistant.
-      </p>
-    </section>
-
-    <section class="content-grid">
-      <article class="panel chart-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">MOCK TREND</p>
-            <h2>Soil moisture history</h2>
-          </div>
-          <span class="time-range">Last 24 hours</span>
-        </div>
-
-        <div class="chart-wrap">
-          <canvas
-            id="soilChart"
-            width="760"
-            height="290"
-            aria-label="Soil moisture chart"
-          ></canvas>
-        </div>
-
-        <div class="legend">
-          <span>
-            <i class="legend-line green"></i>
-            Soil moisture
-          </span>
-          <span>
-            <i class="legend-line target"></i>
-            Target minimum: 35%
-          </span>
-        </div>
-      </article>
-
-      <article class="panel recommendation-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">MOCK AI INSIGHT</p>
-            <h2>Today's recommendation</h2>
-          </div>
-          <span class="sparkle">✦</span>
-        </div>
-
-        <div class="recommendation-icon">💧</div>
-
-        <h3 id="recommendationTitle">Delay irrigation</h3>
-
-        <p id="recommendationText">
-          Soil moisture is currently 41%, and no rain is detected.
-          Recheck tomorrow morning before watering.
-        </p>
-
-        <div class="recommendation-meta">
-          <span>Estimated saving</span>
-          <strong id="saving">25%</strong>
-        </div>
-
-        <button class="primary-button" id="refreshButton">
-          Refresh mock reading
-        </button>
-      </article>
-    </section>
-
-    <section class="bottom-grid">
-      <article class="panel sensors-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">MOCK ENVIRONMENT</p>
-            <h2>Sensor details</h2>
-          </div>
-          <span class="updated" id="updatedAt">
-            Updated just now
-          </span>
-        </div>
-
-        <div class="sensor-list">
-          <div class="sensor-row">
-            <span><b class="sensor-icon">☁</b> CO₂</span>
-            <strong><span id="co2">520</span> ppm</strong>
-          </div>
-
-          <div class="sensor-row">
-            <span><b class="sensor-icon">◌</b> TVOC</span>
-            <strong><span id="tvoc">85</span> ppb</strong>
-          </div>
-
-          <div class="sensor-row">
-            <span><b class="sensor-icon">☔</b> Rain detected</span>
-            <strong id="rain">No</strong>
-          </div>
-
-          <div class="sensor-row">
-            <span><b class="sensor-icon">◉</b> Soil pH</span>
-            <strong id="ph">6.4</strong>
-          </div>
-        </div>
-      </article>
-
-      <article class="panel chat-panel">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">DEEPSEEK AI ASSISTANT</p>
-            <h2>Ask about your farm</h2>
-          </div>
-          <span class="assistant-badge">AI</span>
-        </div>
-
-        <div class="chat-messages" id="chatMessages">
-          <div class="message assistant">
-            Hello! I am DeepSeek. Ask me about irrigation, crop conditions,
-            or today's farm sensor readings.
-          </div>
-        </div>
-
-        <form class="chat-form" id="chatForm">
-          <input
-            id="chatInput"
-            autocomplete="off"
-            placeholder="e.g. Should I water today?"
-          />
-          <button aria-label="Send question">Send</button>
-        </form>
-      </article>
-    </section>
-
-    <footer>
-      AgroSense prototype · Farm readings and AI responses are mock data ·
-      Outdoor temperature: Hong Kong Observatory · Last mock sync:
-      <span id="footerTime"></span>
-    </footer>
-  </main>
-
-  <script src="app.js"></script>
+      <section id="weather" class="card weather-card"><div class="card-heading"><div><p class="eyebrow">PLAN AHEAD</p><h2>The week outside</h2></div><button id="weatherRefresh" class="text-button">↻ Refresh weather</button></div><div class="weather-content"><div class="current-weather"><span class="location-label">HONG KONG OBSERVATORY</span><div class="outdoor-reading"><span aria-hidden="true">☀</span><strong id="hkoTemperature">—</strong><span>°C</span></div><p id="hkoStatus" role="status">Connecting to HKO…</p><span class="weather-source">Outdoor observation · not farm data</span></div><div id="hkoForecastList" class="forecast-list"><p class="muted">Loading the seven-day forecast…</p></div></div><div class="weather-footer"><span><span class="live-dot"></span> External data · Hong Kong Observatory</span><span id="hkoForecastStatus" role="status">Fetching forecast…</span></div></section>
+      <div class="bottom-grid"><section class="card environment-card"><div class="card-heading"><div><p class="eyebrow">THE SMALL DETAILS</p><h2>Growing environment</h2></div><span class="demo-tag">MOCK</span></div><div id="environmentList" class="environment-list"></div><div class="environment-note"><span aria-hidden="true">ⓘ</span><p>Healthy crops start with good observations. Check real sensors before acting on demo insights.</p></div><button id="exportButton" class="text-button export-button">↓ Export mock readings <span>CSV</span></button></section>
+      <section id="assistant" class="card assistant-card"><div class="card-heading"><div class="assistant-title"><span class="assistant-icon" aria-hidden="true">✧</span><div><h2>Your growing companion</h2><p class="muted">Farm context, a little clarity, and a second opinion.</p></div></div><span class="assistant-tag">DeepSeek</span></div><div id="chatMessages" class="chat-messages" role="log" aria-label="Conversation with farm assistant" aria-live="polite"><div class="message assistant">Hi there! I can help you make sense of these mock readings and the available HKO forecast. What’s on your mind?</div></div><div class="chat-suggestions"><button type="button" data-question="Should I water this zone today?">Should I water today? ↗</button><button type="button" data-question="Summarize the current growing conditions and any concerns.">Check growing conditions ↗</button></div><form id="chatForm" class="chat-form"><label class="sr-only" for="chatInput">Ask the farm assistant</label><input id="chatInput" type="text" maxlength="4000" placeholder="Ask something about your farm…" required autocomplete="off"><button id="chatSend" type="submit" aria-label="Send message">↑</button></form><div class="chat-footer"><span id="chatStatus" role="status">Uses your selected zone · Requires configured chat backend</span><button id="clearChat" class="text-button" type="button">Clear chat</button></div></section></div>
+      <footer class="page-footer"><span><strong>AgroSense</strong> &nbsp; A little insight. A healthier harvest.</span><span>Tabler UI · Prototype workspace <span id="footerTime"></span></span></footer>
+    </main>
+  </div>
+  <div id="toast" class="app-toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
