@@ -34,3 +34,6 @@ h2,.assistant-title h2{font-size:20px}
   .chat-messages{height:190px}
   .forecast-list{grid-template-columns:repeat(7,minmax(96px,1fr))}
 }
+/* Shared multi-page navigation state */
+.nav-link[aria-current="page"]{background:#edf2e7;color:#426235;font-weight:700}
+[data-theme=dark] .nav-link[aria-current="page"]{background:#344830;color:#d0e6b1}

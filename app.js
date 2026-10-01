@@ -21,7 +21,45 @@
       return { time: start - (23 - i) * hour, soilMoisture: i === 23 ? seed.soilMoisture : Math.round(seed.soilMoisture + wave + (23 - i) * .18), temperature: i === 23 ? seed.temperature : +(seed.temperature + wave * .4).toFixed(1), humidity: i === 23 ? seed.humidity : Math.round(seed.humidity + wave * 2), light: i === 23 ? seed.light : Math.round(seed.light + wave * 28) };
     })
   }]));
+  const FARM_STORAGE_KEY = 'agrosense-farm-state-v1';
+  const ZONE_STORAGE_KEY = 'agrosense-selected-zone-v1';
+  const numericFarmFields = ['soilMoisture', 'temperature', 'humidity', 'light', 'co2', 'tvoc', 'ph', 'threshold', 'updated'];
   let zoneKey = 'greenhouse';
+
+  function applyStoredFarmState(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object' || !snapshot.zones) return;
+    Object.keys(zones).forEach(key => {
+      const saved = snapshot.zones[key];
+      if (!saved || typeof saved !== 'object') return;
+      numericFarmFields.forEach(field => {
+        if (Number.isFinite(Number(saved[field]))) zones[key][field] = Number(saved[field]);
+      });
+      if (typeof saved.rain === 'boolean') zones[key].rain = saved.rain;
+      if (typeof saved.watered === 'boolean') zones[key].watered = saved.watered;
+      if (Array.isArray(saved.history) && saved.history.length >= 2) {
+        const validHistory = saved.history.slice(-24).filter(row => row && Number.isFinite(Number(row.time)) && Object.keys(definitions).every(field => Number.isFinite(Number(row[field]))));
+        if (validHistory.length >= 2) zones[key].history = validHistory.map(row => ({
+          time: Number(row.time), soilMoisture: Number(row.soilMoisture), temperature: Number(row.temperature),
+          humidity: Number(row.humidity), light: Number(row.light)
+        }));
+      }
+    });
+    if (zones[snapshot.selectedZone]) zoneKey = snapshot.selectedZone;
+  }
+
+  function persistFarmState() {
+    try {
+      localStorage.setItem(FARM_STORAGE_KEY, JSON.stringify({ version: 1, selectedZone: zoneKey, updatedAt: Date.now(), zones }));
+      localStorage.setItem(ZONE_STORAGE_KEY, zoneKey);
+    } catch { /* Storage can be blocked in private browsing. */ }
+  }
+
+  try {
+    applyStoredFarmState(JSON.parse(localStorage.getItem(FARM_STORAGE_KEY) || 'null'));
+    const savedZone = localStorage.getItem(ZONE_STORAGE_KEY);
+    if (zones[savedZone]) zoneKey = savedZone;
+  } catch { /* Use the built-in mock state when saved data is unavailable. */ }
+
   let metric = 'soilMoisture';
   let range = 24;
   let hkoForecast = [];
@@ -99,6 +137,7 @@
   }
   function render() {
     const zone = current();
+    $('zoneSelect').value = zoneKey;
     $('zoneLabel').textContent = zone.label;
     $('zoneDescription').textContent = zone.description;
     $('updatedAt').textContent = `Mock reading · ${timeLabel(zone.updated)} HKT`;
@@ -106,6 +145,7 @@
       ['CO₂', 'Carbon dioxide', `${zone.co2} ppm`], ['◌', 'Air quality · TVOC', `${zone.tvoc} ppb`],
       ['pH', 'Soil pH', zone.ph.toFixed(1)], ['☂', 'Rain detected', zone.rain ? 'Yes · mock' : 'No · mock']
     ].map(([icon, label, value]) => `<div class="sensor-row"><span><b aria-hidden="true">${icon}</b>${label}</span><strong>${value}</strong></div>`).join('');
+    $('footerTime').textContent = new Date().toLocaleDateString('en-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: 'short', day: 'numeric' });
     renderCards(); drawChart(); renderInsight();
   }
   function recordReading() {
@@ -138,7 +178,7 @@
   }
   ['pointerover', 'focusin', 'click'].forEach(type => $('chartArea').addEventListener(type, inspectPoint));
   $('chartArea').addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); inspectPoint(event); } });
-  $('zoneSelect').addEventListener('change', () => { zoneKey = $('zoneSelect').value; render(); toast(`Viewing ${current().label} · simulated readings`); });
+  $('zoneSelect').addEventListener('change', () => { zoneKey = $('zoneSelect').value; persistFarmState(); render(); toast(`Viewing ${current().label} · simulated readings`); });
   $('refreshButton').addEventListener('click', () => {
     const zone = current();
     Object.entries(definitions).forEach(([key, d]) => {
@@ -149,14 +189,14 @@
     zone.co2 = Math.round(470 + Math.random() * 120);
     zone.tvoc = Math.round(50 + Math.random() * 90);
     zone.watered = false;
-    recordReading(); render(); toast('Mock readings refreshed. No live farm sensors connected.');
+    recordReading(); persistFarmState(); render(); toast('Mock readings refreshed. No live farm sensors connected.');
   });
-  $('threshold').addEventListener('input', () => { current().threshold = Number($('threshold').value); renderInsight(); renderCards(); drawChart(); });
+  $('threshold').addEventListener('input', () => { current().threshold = Number($('threshold').value); persistFarmState(); renderInsight(); renderCards(); drawChart(); });
   $('irrigateButton').addEventListener('click', () => {
     const zone = current();
     zone.soilMoisture = Math.min(100, zone.soilMoisture + 5);
     zone.watered = true;
-    recordReading(); render(); toast('Demo watering complete: mock moisture +5 percentage points. No pump was activated.');
+    recordReading(); persistFarmState(); render(); toast('Demo watering complete: mock moisture +5 percentage points. No pump was activated.');
   });
   $('exportButton').addEventListener('click', () => {
     const zone = current();
@@ -230,12 +270,96 @@
     weatherLoading = false; $('weatherRefresh').disabled = false;
   }
   $('weatherRefresh').addEventListener('click', updateWeather);
+  window.addEventListener('storage', event => {
+    if (event.key === FARM_STORAGE_KEY && event.newValue) {
+      try { applyStoredFarmState(JSON.parse(event.newValue)); render(); } catch { /* Ignore invalid cross-tab data. */ }
+    }
+    if (event.key === ZONE_STORAGE_KEY && zones[event.newValue]) {
+      zoneKey = event.newValue; render();
+    }
+  });
   window.AgroSense = Object.freeze({
     getFarmData: () => {
       const { label, soilMoisture, temperature, humidity, light, co2, tvoc, ph, rain, threshold } = current();
       return { zone: label, dataSource: 'MOCK FARM SENSORS', soilMoisture, temperature, humidity, light, co2, tvoc, ph, rain, threshold, hkoForecast: hkoForecast.map(day => ({ ...day })), hkoForecastUpdated: weatherUpdated };
     }
   });
-  render(); updateWeather();
+  persistFarmState(); render(); updateWeather();
   setInterval(updateWeather, 10 * 60 * 1000);
+})();
+
+/* Farm assistant */
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const history = [];
+  let busy = false;
+  function appendMessage(role, content, error = false) {
+    const message = document.createElement('div');
+    message.className = `message ${role}${error ? ' error' : ''}`;
+    message.textContent = content;
+    $('chatMessages').append(message);
+    $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+    return message;
+  }
+  function setBusy(value) {
+    busy = value;
+    $('chatInput').disabled = value;
+    $('chatSend').disabled = value;
+    $('clearChat').disabled = value;
+    document.querySelectorAll('[data-question]').forEach(button => { button.disabled = value; });
+    $('chatForm').setAttribute('aria-busy', String(value));
+  }
+  async function send(question) {
+    if (busy || !question.trim()) return;
+    question = question.trim().slice(0, 4000);
+    const farmData = window.AgroSense.getFarmData();
+    const conversation = history.slice(-12).map(message => ({ ...message }));
+    appendMessage('user', question);
+    $('chatInput').value = '';
+    const pending = appendMessage('assistant', 'Reading your farm context…');
+    setBusy(true);
+    $('chatStatus').textContent = `Asking about ${farmData.zone} · mock sensors`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60000);
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question, conversation, farmData }), signal: controller.signal
+      });
+      if (!response.ok) {
+        if ([404, 405, 501].includes(response.status)) throw new Error('backend-missing');
+        throw new Error('service-unavailable');
+      }
+      const result = await response.json();
+      if (typeof result.answer !== 'string' || !result.answer.trim()) throw new Error('empty-answer');
+      pending.textContent = result.answer.trim();
+      // The backend appends the current question, so history excludes it in the request above.
+      history.push({ role: 'user', content: `[${farmData.zone}] ${question}` }, { role: 'assistant', content: result.answer.trim() });
+      if (history.length > 12) history.splice(0, history.length - 12);
+      $('chatStatus').textContent = `Answered for ${farmData.zone} · Verify advice with real measurements`;
+    } catch (error) {
+      pending.classList.add('error');
+      pending.textContent = error.name === 'AbortError'
+        ? 'The request timed out. Please try again in a moment.'
+        : error.message === 'backend-missing'
+          ? 'Live chat needs the /api/chat backend. The local Python preview only serves static files. Deploy with the existing Cloudflare Pages function and configure DEEPSEEK_API_KEY to enable replies.'
+          : 'The farm assistant is unavailable right now. Please check the chat backend and try again. No generated answer is being shown.';
+      $('chatStatus').textContent = 'Chat unavailable · Your question is ready to retry';
+      $('chatInput').value = question;
+    } finally {
+      clearTimeout(timer); setBusy(false);
+      $('chatInput').focus();
+      $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+    }
+  }
+  $('chatForm').addEventListener('submit', event => { event.preventDefault(); send($('chatInput').value); });
+  document.querySelectorAll('[data-question]').forEach(button => button.addEventListener('click', () => send(button.dataset.question)));
+  $('clearChat').addEventListener('click', () => {
+    if (busy) return;
+    history.length = 0; $('chatMessages').replaceChildren();
+    appendMessage('assistant', 'A fresh start. What would you like to know about the selected farm zone?');
+    $('chatStatus').textContent = 'Uses your selected zone · Requires configured chat backend';
+    $('chatInput').value = ''; $('chatInput').focus();
+  });
 })();

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#254b35">
+  <title>AgroSense · Device controls</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="control.css">
+  <script src="control.js" defer></script>
+</head>
+<body class="controls-page">
+  <a class="skip-link" href="#main">Skip to device controls</a>
+
+  <aside class="sidebar" aria-label="Main navigation">
+    <a href="index.html" class="brand"><span class="brand-mark" aria-hidden="true">↗</span> AgroSense<span class="brand-dot">.</span></a>
+    <div class="workspace"><span class="farm-avatar">G</span><div><strong>Greenfield farm</strong><small>Smart growing workspace</small></div><span class="workspace-arrow" aria-hidden="true">⌄</span></div>
+    <p class="nav-label">WORKSPACE</p>
+    <nav>
+      <a class="nav-link" href="index.html"><span aria-hidden="true">▦</span> Overview</a>
+      <a class="nav-link" href="index.html#sensors"><span aria-hidden="true">⌁</span> Sensor insights</a>
+      <a class="nav-link active" aria-current="page" href="control.html"><span aria-hidden="true">⌘</span> Device controls <span class="nav-count">Demo</span></a>
+      <a class="nav-link" href="index.html#weather"><span aria-hidden="true">☼</span> Weather outlook</a>
+      <a class="nav-link" href="index.html#assistant"><span aria-hidden="true">✧</span> Farm assistant</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="demo-note"><span class="live-dot"></span><strong>Safe simulation mode.</strong><p>These controls do not communicate with physical farm equipment.</p><span class="demo-tag">NO HARDWARE CONNECTED</span></div>
+      <div class="profile"><span class="profile-avatar">GF</span><div><strong>Greenfield team</strong><small>Farm administrator</small></div></div>
+    </div>
+  </aside>
+
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="breadcrumb"><a href="index.html">Workspace</a><span>/</span><strong>Device controls</strong></div>
+      <div class="topbar-actions"><span class="demo-tag">SIMULATION</span><button id="controlThemeToggle" class="icon-button" aria-label="Switch to dark theme" title="Switch theme">◐</button><span class="profile-avatar small-avatar">GF</span></div>
+    </header>
+
+    <main id="main" class="main-content control-content">
+      <section class="page-heading control-heading">
+        <div>
+          <p class="eyebrow">FARM AUTOMATION</p>
+          <h1>Control what helps your crops grow<span>.</span></h1>
+          <p class="muted">Choose manual control or let sensor rules make simulated decisions.</p>
+        </div>
+        <div class="heading-actions control-heading-actions">
+          <label class="sr-only" for="controlZoneSelect">Farm zone</label>
+          <select id="controlZoneSelect" class="form-select">
+            <option value="greenhouse">Greenhouse A</option>
+            <option value="field">Open field B</option>
+            <option value="nursery">Nursery C</option>
+          </select>
+          <button id="applyAutoAll" class="btn secondary-action" type="button">Auto for all</button>
+          <button id="allOffButton" class="btn stop-all-button" type="button">■ Turn all off</button>
+        </div>
+      </section>
+
+      <div class="context-strip control-context">
+        <div><span class="live-dot"></span><strong id="controlZoneLabel">Greenhouse A</strong><span class="context-divider">/</span><span id="controlZoneDescription">Leafy greens · covered growing area</span></div>
+        <span id="lastEvaluation" role="status">Preparing automation rules…</span>
+      </div>
+
+      <section class="safety-banner" aria-label="Simulation notice">
+        <span class="safety-icon" aria-hidden="true">ⓘ</span>
+        <div><strong>This is a control simulation.</strong><p>No physical light, fan, or pump will be switched. Before connecting real equipment, commands must go through a secure server with authentication and hardware safety interlocks.</p></div>
+        <span class="safety-badge">FRONTEND DEMO</span>
+      </section>
+
+      <section class="control-summary" aria-label="Control system summary">
+        <article><span class="summary-icon auto" aria-hidden="true">A</span><div><small>Automatic devices</small><strong id="automaticCount">0 of 3</strong></div></article>
+        <article><span class="summary-icon running" aria-hidden="true">●</span><div><small>Devices running</small><strong id="runningCount">0 of 3</strong></div></article>
+        <article><span class="summary-icon zone" aria-hidden="true">⌁</span><div><small>Sensor source</small><strong id="sensorSourceStatus">Mock readings ready</strong></div></article>
+        <article><span class="summary-icon safe" aria-hidden="true">✓</span><div><small>Hardware connection</small><strong>Disconnected safely</strong></div></article>
+      </section>
+
+      <section class="live-readings" aria-label="Current mock readings">
+        <article><span>☼</span><div><small>Light</small><strong id="controlLightReading">— lux</strong></div></article>
+        <article><span>♨</span><div><small>Temperature</small><strong id="controlTemperatureReading">— °C</strong></div></article>
+        <article><span>◈</span><div><small>Humidity</small><strong id="controlHumidityReading">—%</strong></div></article>
+        <article><span>♧</span><div><small>Soil moisture</small><strong id="controlMoistureReading">—%</strong></div></article>
+        <a href="index.html#sensors">View sensor history <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <section class="device-grid" aria-label="Farm device controls">
+        <article class="card device-card" id="lightCard" data-device-card="light">
+          <div class="device-card-header">
+            <div class="device-identity"><span class="device-icon light-icon" aria-hidden="true">☼</span><div><p class="eyebrow">GROW LIGHT</p><h2>Supplemental lighting</h2></div></div>
+            <span id="lightStatusBadge" class="device-status off"><i></i> Off</span>
+          </div>
+          <p class="device-description">Adds light when the selected zone is darker than your target.</p>
+          <div class="mode-section">
+            <div><strong>Control mode</strong><span id="lightModeHelp">You decide when the light runs.</span></div>
+            <div class="mode-toggle" role="group" aria-label="Grow light control mode">
+              <button type="button" data-device="light" data-mode="manual" aria-pressed="true">Manual</button>
+              <button type="button" data-device="light" data-mode="auto" aria-pressed="false">Auto</button>
+            </div>
+          </div>
+          <div class="device-rule" id="lightRuleText">Manual mode · use the buttons below.</div>
+          <div class="manual-controls" id="lightManualControls">
+            <button type="button" class="device-command" data-device="light" data-command="on">Turn on</button>
+            <button type="button" class="device-command secondary" data-device="light" data-command="off">Turn off</button>
+          </div>
+          <div class="automation-settings">
+            <div class="setting-heading"><label for="lightThreshold">Turn on below</label><output id="lightThresholdValue" for="lightThreshold">400 lux</output></div>
+            <input id="lightThreshold" data-device-setting="lightThreshold" type="range" min="100" max="900" step="25" value="400">
+            <div class="range-labels"><span>100 lux</span><span>900 lux</span></div>
+          </div>
+          <div class="device-footer"><span>Current sensor</span><strong id="lightCurrentValue">— lux</strong></div>
+        </article>
+
+        <article class="card device-card" id="fanCard" data-device-card="fan">
+          <div class="device-card-header">
+            <div class="device-identity"><span class="device-icon fan-icon" aria-hidden="true">✣</span><div><p class="eyebrow">VENTILATION FAN</p><h2>Temperature and airflow</h2></div></div>
+            <span id="fanStatusBadge" class="device-status off"><i></i> Off</span>
+          </div>
+          <p class="device-description">Responds when temperature or humidity reaches its configured limit.</p>
+          <div class="mode-section">
+            <div><strong>Control mode</strong><span id="fanModeHelp">You decide when the fan runs.</span></div>
+            <div class="mode-toggle" role="group" aria-label="Ventilation fan control mode">
+              <button type="button" data-device="fan" data-mode="manual" aria-pressed="true">Manual</button>
+              <button type="button" data-device="fan" data-mode="auto" aria-pressed="false">Auto</button>
+            </div>
+          </div>
+          <div class="device-rule" id="fanRuleText">Manual mode · use the buttons below.</div>
+          <div class="manual-controls" id="fanManualControls">
+            <button type="button" class="device-command" data-device="fan" data-command="on">Turn on</button>
+            <button type="button" class="device-command secondary" data-device="fan" data-command="off">Turn off</button>
+          </div>
+          <div class="automation-settings double-settings">
+            <div>
+              <div class="setting-heading"><label for="fanTemperatureThreshold">Temperature limit</label><output id="fanTemperatureValue" for="fanTemperatureThreshold">30°C</output></div>
+              <input id="fanTemperatureThreshold" data-device-setting="fanTemperatureThreshold" type="range" min="20" max="40" step="1" value="30">
+              <div class="range-labels"><span>20°C</span><span>40°C</span></div>
+            </div>
+            <div>
+              <div class="setting-heading"><label for="fanHumidityThreshold">Humidity limit</label><output id="fanHumidityValue" for="fanHumidityThreshold">80%</output></div>
+              <input id="fanHumidityThreshold" data-device-setting="fanHumidityThreshold" type="range" min="40" max="95" step="1" value="80">
+              <div class="range-labels"><span>40%</span><span>95%</span></div>
+            </div>
+          </div>
+          <div class="device-footer"><span>Current sensors</span><strong id="fanCurrentValue">— °C · —%</strong></div>
+        </article>
+
+        <article class="card device-card pump-card" id="pumpCard" data-device-card="pump">
+          <div class="device-card-header">
+            <div class="device-identity"><span class="device-icon pump-icon" aria-hidden="true">♧</span><div><p class="eyebrow">WATER PUMP</p><h2>Timed irrigation</h2></div></div>
+            <span id="pumpStatusBadge" class="device-status off"><i></i> Off</span>
+          </div>
+          <p class="device-description">Runs a short simulated watering cycle when soil moisture is low.</p>
+          <div class="mode-section">
+            <div><strong>Control mode</strong><span id="pumpModeHelp">Manual starts always require confirmation.</span></div>
+            <div class="mode-toggle" role="group" aria-label="Water pump control mode">
+              <button type="button" data-device="pump" data-mode="manual" aria-pressed="true">Manual</button>
+              <button type="button" data-device="pump" data-mode="auto" aria-pressed="false">Auto</button>
+            </div>
+          </div>
+          <div class="device-rule" id="pumpRuleText">Manual mode · pump is safely off.</div>
+          <div class="manual-controls" id="pumpManualControls">
+            <button type="button" class="device-command pump-start" data-device="pump" data-command="start">Start timed cycle</button>
+            <button type="button" class="device-command secondary" data-device="pump" data-command="stop">Stop pump</button>
+          </div>
+          <div class="automation-settings pump-settings">
+            <div>
+              <div class="setting-heading"><label for="pumpMoistureThreshold">Water below</label><output id="pumpMoistureValue" for="pumpMoistureThreshold">35%</output></div>
+              <input id="pumpMoistureThreshold" data-device-setting="pumpMoistureThreshold" type="range" min="20" max="60" step="1" value="35">
+              <div class="range-labels"><span>20%</span><span>60%</span></div>
+            </div>
+            <label class="compact-setting" for="pumpDuration"><span>Cycle duration</span><select id="pumpDuration" data-device-setting="pumpDuration"><option value="5">5 seconds</option><option value="10" selected>10 seconds</option><option value="15">15 seconds</option><option value="20">20 seconds</option><option value="30">30 seconds</option></select></label>
+            <label class="compact-setting" for="pumpCooldown"><span>Safety cooldown</span><select id="pumpCooldown" data-device-setting="pumpCooldown"><option value="1">1 minute</option><option value="2">2 minutes</option><option value="5" selected>5 minutes</option><option value="10">10 minutes</option></select></label>
+          </div>
+          <div class="device-footer"><span>Current soil moisture</span><strong id="pumpCurrentValue">—%</strong></div>
+        </article>
+      </section>
+
+      <div class="control-bottom-grid">
+        <section class="card activity-card">
+          <div class="card-heading">
+            <div><p class="eyebrow">AUDIT TRAIL</p><h2>Recent control activity</h2></div>
+            <button id="clearActivity" class="text-button" type="button">Clear activity</button>
+          </div>
+          <div id="activityLog" class="activity-log" role="log" aria-live="polite"></div>
+        </section>
+
+        <section class="card integration-card">
+          <div class="card-heading"><div><p class="eyebrow">NEXT STEP</p><h2>Ready for a secure backend</h2></div><span class="demo-tag">NOT CONNECTED</span></div>
+          <div class="integration-body">
+            <div class="integration-path"><span>Control page</span><i>→</i><span>Secure API</span><i>→</i><span>Hardware controller</span></div>
+            <p>The interface keeps device logic separate so simulated commands can later be replaced by authenticated server requests.</p>
+            <ul>
+              <li>Keep hardware credentials on the server.</li>
+              <li>Validate every command and enforce maximum run times.</li>
+              <li>Default devices to OFF after connection loss.</li>
+            </ul>
+            <code>POST /api/devices/{device}</code>
+          </div>
+        </section>
+      </div>
+
+      <footer class="page-footer"><span><strong>AgroSense controls</strong> &nbsp; Manual when you need it. Automatic when conditions call for it.</span><span>Simulation workspace · <span id="controlFooterTime"></span></span></footer>
+    </main>
+  </div>
+
+  <div id="controlToast" class="app-toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
