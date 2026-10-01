@@ -1,4 +1,4 @@
-const MAX_QUESTION_LENGTH = 50000;
+const MAX_QUESTION_LENGTH = 1000;
 const MAX_CONVERSATION_MESSAGES = 12;
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
 
